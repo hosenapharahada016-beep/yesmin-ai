@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Yesmin AI</string>
+    <string name="a11y_label">Yesmin AI screen control</string>
+    <string name="a11y_description">Lets Yesmin read the screen and perform taps, scrolls and navigation only after you turn this on and ask her to.</string>
+</resources>
