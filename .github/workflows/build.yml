@@ -8,6 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -27,10 +28,23 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v4
 
+      - name: Decode signing keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          test -n "$KEYSTORE_BASE64" || (echo "KEYSTORE_BASE64 is missing" && exit 1)
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > app/yesmin-upload.jks
+          test -s app/yesmin-upload.jks
+
       - name: Build APK
-        run: ./gradlew assembleDebug --no-daemon
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          ./gradlew assembleDebug --no-daemon
 
       - uses: actions/upload-artifact@v4
         with:
-          name: yesmin-ai-debug-apk
+          name: yesmin-ai-next-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk

@@ -1,3 +1,4 @@
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -9,24 +10,34 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.yesmin.ai"
+        applicationId = "com.yesmin.ai.next"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0.0"
 
-        // Phones: 64-bit and 32-bit ARM. Add "x86_64" only for emulators.
         ndk {
             abiFilters += listOf("arm64-v8a", "armeabi-v7a")
+        }
+    }
+
+    signingConfigs {
+        create("persistent") {
+            storeFile = file("yesmin-upload.jks")
+            storePassword = System.getenv("KEYSTORE_PASSWORD")
+            keyAlias = System.getenv("KEY_ALIAS")
+            keyPassword = System.getenv("KEY_PASSWORD")
         }
     }
 
     buildTypes {
         debug {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("persistent")
         }
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("persistent")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -38,6 +49,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+
     kotlinOptions {
         jvmTarget = "17"
     }
@@ -46,12 +58,11 @@ android {
         compose = true
         buildConfig = true
     }
+
     composeOptions {
-        // Compose compiler 1.5.14 is the release matching Kotlin 1.9.24.
         kotlinCompilerExtensionVersion = "1.5.14"
     }
 
-    // Keep .glb files uncompressed inside the APK so they can be read without copying.
     androidResources {
         noCompress += listOf("glb")
     }
@@ -86,16 +97,11 @@ dependencies {
 
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
-
-    // On-device OCR (Latin script). Model is bundled, no Play Services download needed.
     implementation("com.google.mlkit:text-recognition:16.0.0")
 
-    // 3D avatar: Google Filament (glTF 2.0 / GLB, morph targets, skeletal animation).
-    // filament-android also contains UiHelper. Both artifacts must use the same version.
     implementation("com.google.android.filament:filament-android:1.56.0")
     implementation("com.google.android.filament:gltfio-android:1.56.0")
 
-    // Unit tests for the engine-independent avatar logic (not run by assembleDebug).
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.json:json:20231013")
 }
