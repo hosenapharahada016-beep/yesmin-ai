@@ -44,7 +44,8 @@ fun AboutScreen(onBack: () -> Unit) {
         )
         InfoCard(
             "Not built yet",
-            "Screen capture, floating assistant button, custom wake word, editing existing project files, scheduled reminders inside the app."
+            "Screen capture, floating assistant button, custom wake word, editing existing project files, scheduled reminders inside the app, true phoneme lip sync. " +
+                "The 3D avatar engine is built, but the 3D character itself needs your .glb model (Settings -> 3D avatar)."
         )
     }
 }

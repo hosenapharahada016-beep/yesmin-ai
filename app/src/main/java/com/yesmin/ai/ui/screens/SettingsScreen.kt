@@ -1,6 +1,9 @@
 package com.yesmin.ai.ui.screens
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
+import androidx.compose.material3.Switch
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -59,6 +62,17 @@ fun SettingsScreen(vm: MainViewModel, onBack: () -> Unit) {
     var userName by remember { mutableStateOf(s.userName) }
     var voice by remember { mutableStateOf(s.voiceName) }
     var picker by remember { mutableStateOf<String?>(null) } // "chat" or "live"
+
+    var assistantName by remember { mutableStateOf(s.assistantName) }
+    var avatarOn by remember { mutableStateOf(s.avatarEnabled) }
+    var headMotion by remember { mutableStateOf(s.avatarHeadMotion) }
+    var aiExpr by remember { mutableStateOf(s.avatarAiExpressions) }
+    var quality by remember { mutableStateOf(s.avatarQuality) }
+    val modelStatus by vm.avatar.modelStatus.collectAsState()
+    val avatarNotice by vm.avatarNotice.collectAsState()
+    val pickGlb = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        if (uri != null) vm.importAvatarModel(uri)
+    }
 
     ScreenScaffold("Settings", onBack) {
         Text("Gemini API key", style = MaterialTheme.typography.titleMedium)
@@ -127,6 +141,10 @@ fun SettingsScreen(vm: MainViewModel, onBack: () -> Unit) {
 
         Text("Personality", style = MaterialTheme.typography.titleMedium)
         OutlinedTextField(
+            value = assistantName, onValueChange = { assistantName = it.take(24) },
+            modifier = Modifier.fillMaxWidth(), label = { Text("Assistant name (shown on home screen)") }, singleLine = true
+        )
+        OutlinedTextField(
             value = userName, onValueChange = { userName = it },
             modifier = Modifier.fillMaxWidth(), label = { Text("What should Yesmin call you?") }, singleLine = true
         )
@@ -144,6 +162,50 @@ fun SettingsScreen(vm: MainViewModel, onBack: () -> Unit) {
             modifier = Modifier.fillMaxWidth(), label = { Text("Live voice name (e.g. Aoede, Puck, Kore)") }, singleLine = true
         )
 
+        Text("3D avatar", style = MaterialTheme.typography.titleMedium)
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Switch(checked = avatarOn, onCheckedChange = { avatarOn = it; vm.setAvatarEnabled(it) })
+            Text("Show 3D avatar on home screen")
+        }
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Switch(checked = headMotion, onCheckedChange = { headMotion = it; s.avatarHeadMotion = it })
+            Text("Gentle head motion (restart to apply)")
+        }
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Switch(checked = aiExpr, onCheckedChange = { aiExpr = it; s.avatarAiExpressions = it })
+            Text("Let the AI choose expressions in calls")
+        }
+        Text("Avatar quality (restart to apply)", style = MaterialTheme.typography.bodyMedium)
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf("auto" to "Auto", "low" to "Battery saver", "high" to "High").forEach { (v, label) ->
+                FilterChip(selected = quality == v, onClick = { quality = v; s.avatarQuality = v }, label = { Text(label) })
+            }
+        }
+        Text(
+            "Current profile: ${vm.avatar.config.profile}, up to ${vm.avatar.config.targetFps} fps, " +
+                "model limit ${vm.avatar.config.maxModelBytes / (1024 * 1024)} MB.",
+            style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(onClick = { pickGlb.launch(arrayOf("*/*")) }, modifier = Modifier.heightIn(min = 48.dp)) {
+                Text("Import .glb model")
+            }
+            OutlinedButton(onClick = { vm.removeAvatarModel() }, modifier = Modifier.heightIn(min = 48.dp)) {
+                Text("Remove imported")
+            }
+        }
+        avatarNotice?.let { Text(it, color = MaterialTheme.colorScheme.secondary) }
+        InfoCard(
+            "Avatar status",
+            when (val m = modelStatus) {
+                is com.yesmin.ai.avatar.ModelStatus.Ready -> "3D model loaded.\n" + m.info.describe()
+                is com.yesmin.ai.avatar.ModelStatus.Placeholder -> "Placeholder in use. " + m.reason
+                is com.yesmin.ai.avatar.ModelStatus.Error -> "Problem: " + m.message
+                com.yesmin.ai.avatar.ModelStatus.Loading -> "Loading…"
+                com.yesmin.ai.avatar.ModelStatus.NotLoaded -> "Open the home screen to load the avatar."
+            } + "\n\nA bundled model goes in app/src/main/assets/avatar/avatar.glb. An imported model replaces it without rebuilding."
+        )
+
         Text("Theme", style = MaterialTheme.typography.titleMedium)
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             listOf("dark" to "Dark", "light" to "Light", "system" to "System").forEach { (v, label) ->
@@ -155,6 +217,7 @@ fun SettingsScreen(vm: MainViewModel, onBack: () -> Unit) {
             onClick = {
                 s.chatModel = chatModel; s.liveModel = liveModel; s.temperature = temp
                 s.personaExtra = persona; s.userName = userName
+                vm.setAssistantName(assistantName)
                 if (voice.isNotBlank()) s.voiceName = voice
                 Toast.makeText(ctx, "Settings saved", Toast.LENGTH_SHORT).show()
             },

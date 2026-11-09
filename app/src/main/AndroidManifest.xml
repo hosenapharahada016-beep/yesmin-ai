@@ -12,6 +12,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
 
     <uses-feature android:name="android.hardware.microphone" android:required="false" />
+    <!-- The 3D avatar needs OpenGL ES 3.0. Phones without it fall back to the placeholder. -->
+    <uses-feature android:glEsVersion="0x00030000" android:required="false" />
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 
     <!-- Needed on Android 11+ to see which apps can be launched by voice command. -->

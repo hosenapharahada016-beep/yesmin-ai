@@ -51,6 +51,11 @@ android {
         kotlinCompilerExtensionVersion = "1.5.14"
     }
 
+    // Keep .glb files uncompressed inside the APK so they can be read without copying.
+    androidResources {
+        noCompress += listOf("glb")
+    }
+
     packaging {
         resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
     }
@@ -84,4 +89,13 @@ dependencies {
 
     // On-device OCR (Latin script). Model is bundled, no Play Services download needed.
     implementation("com.google.mlkit:text-recognition:16.0.0")
+
+    // 3D avatar: Google Filament (glTF 2.0 / GLB, morph targets, skeletal animation).
+    // filament-android also contains UiHelper. Both artifacts must use the same version.
+    implementation("com.google.android.filament:filament-android:1.77.3")
+    implementation("com.google.android.filament:gltfio-android:1.77.3")
+
+    // Unit tests for the engine-independent avatar logic (not run by assembleDebug).
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.json:json:20231013")
 }

@@ -45,6 +45,31 @@ class SettingsStore(context: Context) {
         get() = p.getBoolean("memory_enabled", true)
         set(v) = p.edit().putBoolean("memory_enabled", v).apply()
 
+    /** The name shown on the home screen and used by the AI to refer to itself. */
+    var assistantName: String
+        get() = p.getString("assistant_name", "Yesmin")?.ifBlank { "Yesmin" } ?: "Yesmin"
+        set(v) = p.edit().putString("assistant_name", v.trim().take(24).ifBlank { "Yesmin" }).apply()
+
+    /** false = never start the 3D engine; the home screen shows the placeholder. */
+    var avatarEnabled: Boolean
+        get() = p.getBoolean("avatar_enabled", true)
+        set(v) = p.edit().putBoolean("avatar_enabled", v).apply()
+
+    /** "auto", "low" or "high". Applied the next time the app starts. */
+    var avatarQuality: String
+        get() = p.getString("avatar_quality", "auto") ?: "auto"
+        set(v) = p.edit().putString("avatar_quality", v).apply()
+
+    /** Gentle head / body sway. Turn off if a model's head moves in a strange way. */
+    var avatarHeadMotion: Boolean
+        get() = p.getBoolean("avatar_head_motion", true)
+        set(v) = p.edit().putBoolean("avatar_head_motion", v).apply()
+
+    /** Let the Live model choose expressions through a function call. Falls back automatically if unsupported. */
+    var avatarAiExpressions: Boolean
+        get() = p.getBoolean("avatar_ai_expressions", true)
+        set(v) = p.edit().putBoolean("avatar_ai_expressions", v).apply()
+
     companion object {
         // Defaults are only starting values. Use "Load models" in Settings to see what your key supports.
         // Checked against Google's docs on 2026-11-08: gemini-3.8-flash is listed as stable (text/chat),
