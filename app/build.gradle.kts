@@ -92,8 +92,8 @@ dependencies {
 
     // 3D avatar: Google Filament (glTF 2.0 / GLB, morph targets, skeletal animation).
     // filament-android also contains UiHelper. Both artifacts must use the same version.
-    implementation("com.google.android.filament:filament-android:1.77.3")
-    implementation("com.google.android.filament:gltfio-android:1.77.3")
+    implementation("com.google.android.filament:filament-android:1.56.0")
+    implementation("com.google.android.filament:gltfio-android:1.56.0")
 
     // Unit tests for the engine-independent avatar logic (not run by assembleDebug).
     testImplementation("junit:junit:4.13.2")
