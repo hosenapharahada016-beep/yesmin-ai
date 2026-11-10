@@ -99,8 +99,8 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
     implementation("com.google.mlkit:text-recognition:16.0.0")
 
-    implementation("com.google.android.filament:filament-android:1.56.0")
-    implementation("com.google.android.filament:gltfio-android:1.56.0")
+    implementation("com.google.android.filament:filament-android:1.77.3")
+    implementation("com.google.android.filament:gltfio-android:1.77.3")
 
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.json:json:20231013")
